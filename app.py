@@ -2,13 +2,16 @@ from dotenv import load_dotenv
 import os
 import mysql.connector
 
+load_dotenv()
+
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
-DB_PASS = os.getenv("DB_PASS")
+DB_PASS = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 
-# establish connection
 
+
+# establish connection
 mydb = mysql.connector.connect(
     host=DB_HOST,
     user=DB_USER,
@@ -21,4 +24,9 @@ mycursor = mydb.cursor()
 mycursor.execute("SELECT * FROM testtable")
 
 for x in mycursor:
-    print(x)
+   print(x)
+
+
+   
+# close connection
+mydb.close()
