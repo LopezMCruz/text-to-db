@@ -12,21 +12,47 @@ DB_NAME = os.getenv("DB_NAME")
 
 
 # establish connection
-mydb = mysql.connector.connect(
-    host=DB_HOST,
-    user=DB_USER,
-    password=DB_PASS,
-    database=DB_NAME
-)
+mydb = {
+    
+    'user':DB_USER,
+    'password':DB_PASS,
+    'host':DB_HOST,
+    'database':DB_NAME
+}
+# Establish a database connection
+conn = mysql.connector.connect(**mydb)
+cursor = conn.cursor()
 
-mycursor = mydb.cursor()
+# Directory containing your .txt files
+directory = "C:/Users/CruzC/text-to-db/text-docs/Dracula/"
 
-mycursor.execute("SELECT * FROM testtable")
+# Function to extract chapter and section from filename
+def extract_info_from_filename(filename):
+    parts = filename.replace('dracula_', '').replace('.txt', '').split('_')
+    chapter = parts[0]
+    section = parts[1]
+    return chapter, section
 
-for x in mycursor:
-   print(x)
+# Loop through each file in the directory
+for filename in os.listdir(directory):
+    if filename.endswith(".txt"):
+        # Extract chapter and section
+        chapter, section = extract_info_from_filename(filename)
 
+        # Read content from file
+        with open(os.path.join(directory, filename), 'r', encoding='utf-8') as file:
+            content = file.read()
 
-   
-# close connection
-mydb.close()
+        # SQL query to insert data
+        query = "INSERT INTO `dracula` (`chapter`, `section`, `content`) VALUES (%s, %s, %s)"
+        values = (chapter, section, content)
+
+        # Execute query
+        cursor.execute(query, values)
+
+# Commit changes and close connection
+conn.commit()
+cursor.close()
+conn.close()
+
+print("Data insertion complete.")
